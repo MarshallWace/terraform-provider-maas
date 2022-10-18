@@ -25,23 +25,17 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      -
-        name: Import GPG key
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
         id: import_gpg
-        uses: hashicorp/ghaction-import-gpg@v2.1.0
-        env:
-          # These secrets will need to be configured for the repository:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          PASSPHRASE: ${{ secrets.PASSPHRASE }}
-      -
-        name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.9.1
         with:
-          version: latest
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v3
+        with:
           args: release --rm-dist
         env:
-          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          # GitHub sets this automatically
+          # GitHub sets the GITHUB_TOKEN secret automatically.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
